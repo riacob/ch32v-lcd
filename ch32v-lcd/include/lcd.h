@@ -24,7 +24,7 @@ typedef struct
     uint8_t LCDCONF_PINS_CS[2];       // Chip select
     uint8_t LCDCONF_ROWS;             // Number of rows
     uint8_t LCDCONF_COLS;             // Number of columns
-    uint8_t LCDCONF_ROW_OFST[4];   // Memory offsets for each row
+    uint8_t LCDCONF_ROW_OFST[4];      // Memory offsets for each row
 } lcd_conf_t;
 
 void lcd_init();
@@ -33,5 +33,7 @@ void lcd_setcursor(uint8_t col, uint8_t row);
 void lcd_poff();
 void lcd_printstr(char *str);
 void lcd_setconf(lcd_conf_t *conf);
+
+void lcd_test();
 
 #endif /* _LCD_H */

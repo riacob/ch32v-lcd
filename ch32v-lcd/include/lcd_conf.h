@@ -37,5 +37,6 @@
 #define LCDCONF_MAX_BL 1       // Max number of backlight lines
 #define LCDCONF_MAX_CS 2       // Max number of CS lines
 #define LCDCONF_MAX_ROWS 4     // Max number of rows
+#define LCDCONF_TESTMODE 1 // Test mode for current settings
  
 #endif /* _LCD_CONF_H */
