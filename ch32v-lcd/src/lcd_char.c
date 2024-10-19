@@ -11,23 +11,7 @@
 #include "lcd.h"
 #include "assert.h"
 
-const uint8_t LCDCONF_PINS_DATABITS[] = {PA0, PA1, PA2, PA3, PA4, PA5, PA6, PA7}; // DB[0:7]
-const uint8_t LCDCONF_PINS_RS[] = {PA8};                                          // Data/Command select
-const uint8_t LCDCONF_PINS_RW[] = {PA9};                                          // Read/Write select
-const uint8_t LCDCONF_PINS_E[] = {PB13};                                          // Enable
-const uint8_t LCDCONF_PINS_BL[] = {PA15};                                         // Backlight
-
-#if defined(LCDCONF_TYPE_C_1602_GENERIC_8BIT) || defined(LCDCONF_TYPE_C_2004_GENERIC_8BIT)
-
-#if defined(LCDCONF_TYPE_C_2004_GENERIC_8BIT) || defined(LCDCONF_TYPE_C_2004_GENERIC_4BIT)
-const uint8_t LCDCONF_ROW_OFST[] = {0x00, 0x40, 0x14, 0x54};
-const uint8_t LCDCONF_COLS = 20;
-const uint8_t LCDCONF_ROWS = 4;
-#elif defined(LCDCONF_TYPE_C_1602_GENERIC_8BIT) || defined(LCDCONF_TYPE_C_1602_GENERIC_8BIT)
-const uint8_t LCDCONF_ROW_OFST[] = {0x00, 0x40};
-const uint8_t LCDCONF_COLS = 16;
-const uint8_t LCDCONF_ROWS = 2;
-#endif
+#if defined(LCDCONF_CATGR_CHARACTER)
 
 #define LCD_CMD_CLR 0b00000001
 #define LCD_CMD_HOME 0b00000010
@@ -59,66 +43,59 @@ const uint8_t LCDCONF_ROWS = 2;
 #define LCD_FLG_FSET_FONT5x8 0
 #define LCD_FLG_FSET_FONT5x10 0b00000100
 
+lcd_conf_t lcd = {
+    .LCDCONF_PINS_DATABITS = {PA0, PA1, PA2, PA3, PA4, PA5, PA6, PA7},
+    .LCDCONF_PINS_RS = {PA8},
+    .LCDCONF_PINS_RW = {PA9},
+    .LCDCONF_PINS_E = {PB13},
+    .LCDCONF_PINS_BL = {PA15},
+    .LCDCONF_ROWS = 4,
+    .LCDCONF_COLS = 20,
+    .LCDCONF_ROW_OFST = {0x00, 0x40, 0x14, 0x54}};
+
 void lcd_writeraw(uint8_t byte)
 {
     for (int i = 0; i < 8; i++)
     {
-        funDigitalWrite(LCDCONF_PINS_DATABITS[i], ((byte >> i) & 1));
+        funDigitalWrite(lcd.LCDCONF_PINS_DATABITS[i], ((byte >> i) & 1));
     }
 }
 
 void lcd_en()
 {
-    funDigitalWrite(LCDCONF_PINS_E[0], FUN_LOW);
-    funDigitalWrite(LCDCONF_PINS_E[0], FUN_HIGH);
+    funDigitalWrite(lcd.LCDCONF_PINS_E[0], FUN_LOW);
+    funDigitalWrite(lcd.LCDCONF_PINS_E[0], FUN_HIGH);
     Delay_Us(100);
-    funDigitalWrite(LCDCONF_PINS_E[0], FUN_LOW);
+    funDigitalWrite(lcd.LCDCONF_PINS_E[0], FUN_LOW);
     Delay_Us(1);
 }
 
 void lcd_writecommand(uint8_t cmd)
 {
-    funDigitalWrite(LCDCONF_PINS_RS[0], 0);
-    funDigitalWrite(LCDCONF_PINS_RW[0], 0);
+    funDigitalWrite(lcd.LCDCONF_PINS_RS[0], 0);
+    funDigitalWrite(lcd.LCDCONF_PINS_RW[0], 0);
     lcd_writeraw(cmd);
     lcd_en();
 }
 
 void lcd_writedata(uint8_t dat)
 {
-    funDigitalWrite(LCDCONF_PINS_RS[0], 1);
-    funDigitalWrite(LCDCONF_PINS_RW[0], 0);
+    funDigitalWrite(lcd.LCDCONF_PINS_RS[0], 1);
+    funDigitalWrite(lcd.LCDCONF_PINS_RW[0], 0);
     lcd_writeraw(dat);
     lcd_en();
 }
 
-void lcd_readram(uint8_t addr)
-{
-    funDigitalWrite(LCDCONF_PINS_RS[0], 1);
-    funDigitalWrite(LCDCONF_PINS_RW[0], 1);
-    lcd_en();
-    // currently ignoring data
-}
-
 void lcd_init()
 {
-    /* Check configuration sanity */
-    static_assert(sizeof(LCDCONF_PINS_RS) == 1, "");
-    static_assert(sizeof(LCDCONF_PINS_RW) == 1, "");
-    static_assert(sizeof(LCDCONF_PINS_E) == 1, "");
-    static_assert(sizeof(LCDCONF_PINS_BL) == 1, "");
-    static_assert(sizeof(LCDCONF_PINS_DATABITS) == 8, "");
     /* Configure GPIO */
-    funDigitalWrite(LCDCONF_PINS_RW[0], 0);
-    funDigitalWrite(LCDCONF_PINS_RS[0], 0);
-    funDigitalWrite(LCDCONF_PINS_E[0], 0);
-    funPinMode(LCDCONF_PINS_RS[0], GPIO_CFGLR_OUT_10Mhz_PP);
-    funPinMode(LCDCONF_PINS_RW[0], GPIO_CFGLR_OUT_10Mhz_PP);
-    funPinMode(LCDCONF_PINS_E[0], GPIO_CFGLR_OUT_10Mhz_PP);
-    funPinMode(LCDCONF_PINS_BL[0], GPIO_CFGLR_OUT_10Mhz_PP);
+    funPinMode(lcd.LCDCONF_PINS_RS[0], GPIO_CFGLR_OUT_10Mhz_PP);
+    funPinMode(lcd.LCDCONF_PINS_RW[0], GPIO_CFGLR_OUT_10Mhz_PP);
+    funPinMode(lcd.LCDCONF_PINS_E[0], GPIO_CFGLR_OUT_10Mhz_PP);
+    funPinMode(lcd.LCDCONF_PINS_BL[0], GPIO_CFGLR_OUT_10Mhz_PP);
     for (uint8_t i = 0; i < 8; i++)
     {
-        funPinMode(LCDCONF_PINS_DATABITS[i], GPIO_CFGLR_OUT_10Mhz_PP);
+        funPinMode(lcd.LCDCONF_PINS_DATABITS[i], GPIO_CFGLR_OUT_10Mhz_PP);
     }
     /* Init sequence */
     Delay_Ms(50);
@@ -142,21 +119,21 @@ void lcd_init()
 
 void lcd_printchar(char c)
 {
-    lcd_writedata(c); // Print char
+    lcd_writedata(c);
     Delay_Us(50);
 }
 
 void lcd_setcursor(uint8_t col, uint8_t row)
 {
-    if (col > LCDCONF_COLS)
+    if (col > lcd.LCDCONF_ROWS)
     {
         return;
     }
-    if (row > LCDCONF_ROWS)
+    if (row > lcd.LCDCONF_ROWS)
     {
         return;
     }
-    lcd_writecommand(LCD_CMD_SETDDADDR | ((col + LCDCONF_ROW_OFST[row])));
+    lcd_writecommand(LCD_CMD_SETDDADDR | ((col + lcd.LCDCONF_ROW_OFST[row])));
     Delay_Us(50);
 }
 
@@ -168,9 +145,16 @@ void lcd_poff()
 void lcd_printstr(char *str)
 {
     uint32_t i = 0;
-    while (str[i] != '\0') {
+    while (str[i] != '\0')
+    {
         lcd_printchar(str[i++]);
     }
+}
+
+void lcd_setconf(lcd_conf_t *conf)
+{
+    // Copy values to retain data in library
+    lcd = *conf;
 }
 
 #endif
