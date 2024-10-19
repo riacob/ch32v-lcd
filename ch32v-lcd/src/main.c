@@ -8,8 +8,17 @@ int main()
 
 	// Enable GPIOs
 	funGpioInitAll();
+	lcd_init();
+	lcd_setcursor(0, 0);
+	lcd_printstr("Hello World");
+	lcd_setcursor(0, 1);
+	lcd_printstr("Second line :)");
+	lcd_setcursor(0, 2);
+	lcd_printstr("Third line :)");
+	lcd_setcursor(0, 3);
+	lcd_printstr("Fourth line :)");
 
-	funPinMode(PC13, GPIO_Speed_10MHz | GPIO_CNF_OUT_PP);
+	// lcd_poff();
 
 	while (1)
 	{

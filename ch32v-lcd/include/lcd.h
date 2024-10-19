@@ -11,5 +11,19 @@
  */
 #ifndef _LCD_H
 #define _LCD_H
+
 #include "lcd_conf.h"
+
+/* Common functions */
+void lcd_init();
+void lcd_printchar(char c);
+void lcd_setcursor(uint8_t col, uint8_t row);
+void lcd_poff();
+void lcd_printstr(char *str);
+
+/* Character LCD functions */
+
+
+/* Graphical LCD functions */
+
 #endif /* _LCD_H */
