@@ -1,21 +1,22 @@
+/**
+ * @file lcd_test.c
+ * @author Riccardo Iacob (github.com/riacob)
+ * @brief Implementation of ch32v-lcd test mode
+ * @version 0.1
+ * @date 2024-10-19
+ *
+ * @copyright Copyright (c) 2024, MIT license
+ *
+ */
 #include "lcd.h"
 
 void lcd_test()
 {
-#ifndef LCDCONF_TESTMODE
-#error "Trying to run lcd_test() test while LCDCONF_TESTMODE is disabled"
-#endif
+#if defined(LCDCONF_TESTMODE)
+
+#if defined(LCDCONF_CATGR_CHARACTER)
+
 #if defined(LCDCONF_TYPE_C_2004_GENERIC_8BIT) || defined(LCDCONF_TYPE_C_2004_GENERIC_4BIT)
-    lcd_conf_t lcd_cfg = {
-        .LCDCONF_PINS_DATABITS = {PA0, PA1, PA2, PA3, PA4, PA5, PA6, PA7},
-        .LCDCONF_PINS_RS = {PA8},
-        .LCDCONF_PINS_RW = {PA9},
-        .LCDCONF_PINS_E = {PB13},
-        .LCDCONF_PINS_BL = {PA15},
-        .LCDCONF_ROWS = 4,
-        .LCDCONF_COLS = 20,
-        .LCDCONF_ROW_OFST = {0x00, 0x40, 0x14, 0x54}};
-    lcd_setconf(&lcd_cfg);
     lcd_init();
     lcd_setcursor(0, 0);
     lcd_printstr("Hello World");
@@ -25,7 +26,28 @@ void lcd_test()
     lcd_printstr("Third line :)");
     lcd_setcursor(0, 3);
     lcd_printstr("Fourth line :)");
+#elif defined(LCDCONF_TYPE_C_1602_GENERIC_8BIT) || defined(LCDCONF_TYPE_C_1602_GENERIC_4BIT)
+    lcd_init();
+    lcd_setcursor(0, 0);
+    lcd_printstr("Hello World");
+    lcd_setcursor(0, 1);
+    lcd_printstr("Second line :)");
 #else
 #error "Selected display type has no testing routine"
+#endif
+
+#elif defined(LCDCONF_CATGR_GRAPHICAL)
+
+#if defined(LCDCONF_TYPE_G_WG12864A_8BIT)
+    lcd_init();
+    lcd_draw_dot(0, 0);
+// lcd_writebuffer();
+#else
+#error "Selected display type has no testing routine"
+#endif
+#endif
+
+#else
+#error "Trying to run lcd_test() test while LCDCONF_TESTMODE is disabled"
 #endif
 }
